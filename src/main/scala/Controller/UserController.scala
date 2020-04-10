@@ -53,8 +53,8 @@ object UserController extends Directives  {
       get{
         
         onComplete(UserService.getAll()){
-          case Success(users) => complete(users)// 
-          //case Success(users) => complete("users") 
+          //case Success(users) => complete(users)
+          case Success(users) => complete("Greatings")
           case Failure(ex) => complete(BadRequest, errorMsg)
         }
       } //~
