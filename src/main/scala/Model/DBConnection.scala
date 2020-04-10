@@ -1,12 +1,23 @@
 package Model
 import com.typesafe.config.{Config, ConfigFactory}
 import slick.jdbc.JdbcBackend._
-import slick.jdbc.PostgresProfile.api
+
+/*
+*   dataSourceClass = "slick.jdbc.DatabaseUrlDataSource"
+      properties = {
+        driver = "org.postgresql.Driver"
+        url = "postgres://postgres:postgres@localhost/resttestdb"
+      }
+
+*
+* */
+
 
 object DBConnection {
-  var db = Database.forConfig("dbConf")
-  val conf: Config = ConfigFactory.load()
-  val driver: String = conf.getString("db.driver")
+  val jdbcUrl: String = "jdbc:postgresql://localhost:5432/resttestdb?user=postgres&password=postgres"
+  val driver: String = "org.postgresql.Driver"
+  var db = Database.forURL(jdbcUrl, driver)
+  println("-----> Connection is done!")
+  println(db.toString())
 
-  //val profile: JdbcProfile = driver "org.postgresql.Driver" => PostgresProfile
 }

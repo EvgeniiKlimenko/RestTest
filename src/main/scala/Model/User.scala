@@ -18,9 +18,9 @@ final case class User(
 
 class Users(tag: Tag) extends Table[User](tag, "users") {
   def id = column[Long]("id", O.AutoInc, O.PrimaryKey)
-  def firstName = column[String]("firstName")
-  def lastName = column[String]("lastName")
-  //def dateOfBirth  = column[java.util.Date]("dateOfBirth")
+  def firstName = column[String]("firstname")
+  def lastName = column[String]("lastname")
+  //def dateOfBirth  = column[java.util.Date]("dateofbirth")
   def address = column[String]("address")
   def * = (id, firstName, lastName, address) <>(User.tupled, User.unapply)
 

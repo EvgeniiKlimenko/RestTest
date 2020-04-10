@@ -26,14 +26,24 @@ object UserService extends TableQuery(new Users(_)) {
   var db = DBConnection.db
   val table = TableQuery[Model.Users]
 
-/*
+  def getAll(): Future[Seq[Model.User]] = {
+    val q = for (c <- table) yield c
+    val a = q.result
+    val f: Future[Seq[Model.User]] = db.run(a)
+    return f;
+  }
+
+  def saveUser(usr: User) = db.run {
+    table.map(c => (c.firstName, c.lastName, c.address)) += (usr.firstName, usr.lastName, usr.address)
+  }
+
   def getWithID(userId: Long): Future[Option[User]] = {
-    val q = table.filter(_.id == userId)
+    val q = table.filter(_.id === userId)
     val action = q.result.headOption
     val ussr: Future[Option[User]] = db.run(action)
     return ussr
   }
-*/
+
 /*
   def deleteUser(userId: Long): Future[Int] = {
     //db.run(table.filter(_.id == userId).delete)
@@ -45,19 +55,8 @@ object UserService extends TableQuery(new Users(_)) {
   }
 */
   //def getAll(limit: Int = 10, from: Int = 0): Future[Seq[Model.User]] = {
-  def getAll(limit: Int = 10, from: Int = 0): Future[Seq[Model.User]] = {
-    val q = for (c <- table) yield c
-    val a = q.result
-    val f: Future[Seq[Model.User]] = db.run(a)
-    
-    return f;
-  }
 
 
-  def saveUser(usr: User) = db.run {
-    table.map(c => (c.firstName, c.lastName, c.address)) += (usr.firstName, usr.lastName, usr.address)
-
-  }
 /*
   def updateUser(id: Long, usr: User) = db.run {
     for {
