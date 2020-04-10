@@ -19,18 +19,22 @@ import slick.ast.{TableNode, Symbol, SymbolNamer, ColumnOption}
 import slick.util.DumpInfo
 
 
+
+
 object UserService extends TableQuery(new Users(_)) {
+  
   var db = DBConnection.db
-  val table = TableQuery[User]
+  val table = TableQuery[Model.Users]
 
-
+/*
   def getWithID(userId: Long): Future[Option[User]] = {
     val q = table.filter(_.id == userId)
     val action = q.result.headOption
     val ussr: Future[Option[User]] = db.run(action)
     return ussr
   }
-
+*/
+/*
   def deleteUser(userId: Long): Future[Int] = {
     //db.run(table.filter(_.id == userId).delete)
     val q = table.filter(_.id == userId)
@@ -39,11 +43,13 @@ object UserService extends TableQuery(new Users(_)) {
     val sql = action.statements.head
     return affectedRowsCount
   }
-
-  def getAll(limit: Int = 10, from: Int = 0): Future[Seq[User]] = {
+*/
+  //def getAll(limit: Int = 10, from: Int = 0): Future[Seq[Model.User]] = {
+  def getAll(limit: Int = 10, from: Int = 0): Future[Seq[Model.User]] = {
     val q = for (c <- table) yield c
     val a = q.result
-    val f: Future[Seq[User]] = db.run(a)
+    val f: Future[Seq[Model.User]] = db.run(a)
+    
     return f;
   }
 
@@ -52,7 +58,7 @@ object UserService extends TableQuery(new Users(_)) {
     table.map(c => (c.firstName, c.lastName, c.address)) += (usr.firstName, usr.lastName, usr.address)
 
   }
-
+/*
   def updateUser(id: Long, usr: User) = db.run {
     for {
       _ <- table.filter(_.id == id).update(usr.copy(id = usr.id, usr.firstName, usr.lastName, usr.address))
@@ -60,6 +66,7 @@ object UserService extends TableQuery(new Users(_)) {
     } yield res
 
   }
+*/
 
 }
 
