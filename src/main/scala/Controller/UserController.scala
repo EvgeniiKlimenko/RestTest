@@ -1,36 +1,76 @@
+
 package Controller
+/*
+
+
+
+import akka.actor.Actor
+
+import akka.http.scaladsl.server.Directives._
+
 import akka.http.scaladsl.marshalling.ToResponseMarshallable
 import akka.http.scaladsl.model.StatusCodes._
+
+
 import akka.http.scaladsl.server.Directives
-import akka.actor.Actor
-import Model.Users
-import Model.User
-import Service.UserService
-import scala.util.{Failure, Success}
-import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
-import org.slf4j.LoggerFactory
+import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport
 import spray.json._
 
 
-object UserController extends Directives {
-  val points = path("user") {
-    get{
-      println("GET all users")
-      onComplete(UserService.getAll()){
-        case Success(users) => complete(users)
-        case Failure(ex) => complete(BadRequest, s"Houston, we have a problem: ${ex.getMessage}")
-      }
-    } ~
-    post {
-      println("POST a new user")
-      entity(as[User]){ user =>
-          onComplete(UserService.saveUser(user)){
-            case Success(user) => complete(Created)
-            case Failure(ex) => complete(BadRequest, s"Houston, we have a problem: ${ex.getMessage}")
-          }
-      }
-    } ~
-  }
+import Model.Users
+import Model.User
+
+
+
+import org.slf4j.LoggerFactory
+*/
+
+import scala.language.postfixOps
+import scala.util.{Failure, Success}
+
+import akka.http.scaladsl.server.Directives
+import akka.http.scaladsl.server.Directives._
+import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport
+import spray.json._
+
+import akka.http.scaladsl.marshalling.ToResponseMarshallable
+
+
+import akka.http.scaladsl.model.StatusCodes._
+import akka.http.scaladsl.model.StatusCodes
+
+import Service.UserService
+import Model.{User, Users}
+
+
+object UserController extends Directives  {
+  
+  val errorMsg: String = s"internal error"
+  val unexpectedMsg: String = s"unexpected result"
+
+  val points = 
+    path("user") {
+      get{
+        
+        onComplete(UserService.getAll()){
+          case Success(users) => complete(users)// 
+          //case Success(users) => complete("users") 
+          case Failure(ex) => complete(BadRequest, errorMsg)
+        }
+      } //~
+      /*post {
+        // println("POST a new user")
+        
+        entity(as[User]){ user =>
+            onComplete(UserService.saveUser(user)){
+              case Success(user) => complete(Created)
+              case Failure(ex) => complete(BadRequest, s"Houston, we have a problem: ${ex.getMessage}")
+            }
+        }
+      } ~*/
+    }
+
+  /*
   //work with user with specific ID
   path("user" / LongNumber){ userId =>
     get{
@@ -59,5 +99,5 @@ object UserController extends Directives {
       }
     } ~
   }
-
+  */
 }

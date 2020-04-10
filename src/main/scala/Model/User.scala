@@ -6,11 +6,15 @@ import slick.jdbc.PostgresProfile.api._
 import java.util.UUID
 
 
-case class User(id: Long,
-                firstName: String,
-                lastName: String,
-                //dateOfBirth: Option[java.util.Date],
-                address: String)
+final case class UserItem(name: String, id: Long)
+
+final case class User( 
+  id: Long,
+  firstName: String,
+  lastName: String,
+  //dateOfBirth: Option[java.util.Date],
+  address: String
+)
 
 class Users(tag: Tag) extends Table[User](tag, "users") {
   def id = column[Long]("id", O.AutoInc, O.PrimaryKey)
@@ -19,6 +23,7 @@ class Users(tag: Tag) extends Table[User](tag, "users") {
   //def dateOfBirth  = column[java.util.Date]("dateOfBirth")
   def address = column[String]("address")
   def * = (id, firstName, lastName, address) <>(User.tupled, User.unapply)
+
 /*
   implicit val dateTypeMapper = MappedTypeMapper.base[java.util.Date, java.sql.Date](
     {
@@ -27,5 +32,6 @@ class Users(tag: Tag) extends Table[User](tag, "users") {
       sd => new java.util.Date(sd.getTime)
     }
   )
-  */
+*/
+
 }
