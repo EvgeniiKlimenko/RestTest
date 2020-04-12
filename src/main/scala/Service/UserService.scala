@@ -1,30 +1,91 @@
 package Service
-import slick.jdbc.PostgresProfile.api._
-import slick.sql.SqlAction
-import slick.jdbc.PostgresProfile._
-import slick._
-import scala.concurrent.Future
-import slick.lifted.{Query, TableQuery}
+import java.util.UUID
+
 import Model.{User, Users}
 import Model.DBConnection
-import scala.concurrent.{Future, Await}
+import slick.jdbc.PostgresProfile.api._
+import slick.sql.{FixedSqlAction, SqlAction}
+import slick.jdbc.PostgresProfile._
+import slick._
+import spray.json._
+import DefaultJsonProtocol._
+import slick.dbio.Effect
+import slick.lifted.{Query, TableQuery}
+
+import scala.concurrent.{Await, Future}
 import scala.concurrent.ExecutionContext.Implicits.global
-
-import slick.basic.{BasicStreamingAction, BasicAction}
-import slick.compiler.QueryCompiler
-import slick.relational.{RelationalActionComponent, RelationalTableComponent, RelationalProfile}
-
-import slick.dbio._
-import slick.ast.{TableNode, Symbol, SymbolNamer, ColumnOption}
-import slick.util.DumpInfo
-
+import scala.concurrent.duration.Duration
 
 
 
 object UserService extends TableQuery(new Users(_)) {
-  
+  val onSuccessJson: JsValue = """{ "Success": "true" }""".parseJson
+  val onFailJson: JsValue = """{ "Success": "false" }""".parseJson
+  implicit val myFormat: RootJsonFormat[User] = jsonFormat5(Model.User)
+  /*
+  implicit val UserJsonWriter = new JsonWriter[Model.User] {
+    def write(user: Model.User): JsValue = {
+      JsObject(
+        "_id" -> JsString(user.id),
+        "firstname" -> JsString(user.firstName),
+        "lastname" -> JsString(user.lastName),
+        "birth" -> JsString(user.birth),
+        "address" -> JsString(user.address)
+      )
+    }
+  }
+*/
   var db = DBConnection.db
   val table = TableQuery[Model.Users]
+  val pause : Duration = Duration.create(1000, "ms")
+
+  def getAllJson(): Unit ={
+    val res: Future[Seq[Model.User]] = getAll()
+    val resSeq: Seq[User] = Await.result(res, pause)
+
+  }
+
+  def saveUserJson(userIn: User): JsValue = {
+    //val usr: User = userJson.convertTo
+    val res: Int = Await.result(saveUser(userIn), pause) // convert Future to Int
+    if (res != 1) {
+      return onFailJson
+    } else {
+      return onSuccessJson
+    }
+  }
+
+
+  def getWithIdJson(id: String): JsValue = {
+    //val userObj: Future[Option[User]] = getWithID(id)
+    val prepUser: User  = Await.result(getWithID(id), pause).head // convert Future to User.obj
+    val userJson: JsValue = prepUser.toJson
+    return userJson
+  }
+
+  // restriction: this method takes only whole User object with changed and unchanged fields
+  def updateUserJson(id: String, userIn: User): JsValue ={ // unused id:String
+    //val usr: User = userJson.convertTo[User]
+    println(userIn.toString)
+    val res: Int  = Await.result(updateUser(userIn.id, userIn), pause) // Update DB
+    //val userToResponse: User = updatedUser.copy(id=UUID.randomUUID().toString) // Prepare for response
+    if (res != 1) {
+      return onFailJson
+    }else {
+      return onSuccessJson
+    }
+  }
+
+  def deleteUserJson(id: String): JsValue ={
+    val res: Int = Await.result(deleteUser(id), pause)
+    if (res != 1) {
+      return onFailJson
+    }else {
+      return onSuccessJson
+    }
+  }
+
+  // -----> PRIVATES!
 
   def getAll(): Future[Seq[Model.User]] = {
     val q = for (c <- table) yield c
@@ -33,39 +94,33 @@ object UserService extends TableQuery(new Users(_)) {
     return f;
   }
 
-  def saveUser(usr: User) = db.run {
-    table.map(c => (c.firstName, c.lastName, c.address)) += (usr.firstName, usr.lastName, usr.address)
+  def saveUser(usr: User): Future[Int] = db.run {
+    val insertUser:User = usr.copy(id=UUID.randomUUID().toString)
+    table.map(c => (c.id, c.firstName, c.lastName, c.born, c.address)) += (insertUser.id, insertUser.firstName, insertUser.lastName, insertUser.born, insertUser.address)
   }
 
-  def getWithID(userId: Long): Future[Option[User]] = {
+  def getWithID(userId: String): Future[Option[User]] = {
     val q = table.filter(_.id === userId)
     val action = q.result.headOption
-    val ussr: Future[Option[User]] = db.run(action)
-    return ussr
+    val userFromDB: Future[Option[User]] = db.run(action)
+    //val ussr: User = Await.result(userFromDB, wait).head
+    return userFromDB
   }
 
-/*
-  def deleteUser(userId: Long): Future[Int] = {
-    //db.run(table.filter(_.id == userId).delete)
-    val q = table.filter(_.id == userId)
+  def deleteUser(userId: String): Future[Int] = {
+    val q = table.filter(_.id === userId)
     val action = q.delete
     val affectedRowsCount: Future[Int] = db.run(action)
-    val sql = action.statements.head
+    //val sql = action.statements.head
     return affectedRowsCount
   }
-*/
-  //def getAll(limit: Int = 10, from: Int = 0): Future[Seq[Model.User]] = {
 
-
-/*
-  def updateUser(id: Long, usr: User) = db.run {
-    for {
-      _ <- table.filter(_.id == id).update(usr.copy(id = usr.id, usr.firstName, usr.lastName, usr.address))
-      res <- table.filter(_.id == id).result.headOption
-    } yield res
+  def updateUser(userId: String, ussr: User): Future[Int] =  { // unused userId:String
+    val q = table.filter(_.id === userId).update(ussr.copy(id = ussr.id, ussr.firstName, ussr.lastName, ussr.born, ussr.address))
+    val res:Future[Int]  = db.run(q)
+    return res
 
   }
-*/
 
 }
 
@@ -73,63 +128,3 @@ object UserService extends TableQuery(new Users(_)) {
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/*
-def getWithID(id: Long): Future[Option[User]] = db.run {
-table.filter(_.id == id).result.headOption
-}
-
-def updateUser(usrId: Long, usr: User): Future[Option[User]] = db.run{
-  table.filter(_.id == usrId).update(usr).map {
-  case 0 => None
-  case _ => Some(usr)
-}
-/*
-val q = for { c <- table if c.id == usrId } yield c
-val updateAction = q.update(usr)
-
-for {
-  //_ <- table.filter(_.id == usrId).update(usr.copy(id = usrId))
-  //res <- table.filter(_.id == usrId).result.headOption
-} yield res
-*/
-}
-
-def saveUser(usr: User)= db.run{
-//val insertUser: User = usr.copy()
-table.map(c => (c.firstName, c.lastName, c.address)) += (usr.firstName, usr.lastName, usr.address)
-/*
-db.run {
-  for {
-    //_ <- table += insertUser
-    _ <- table ++= usr
-    res <- table.filter(_.id == insertUser.id).result.head
-  } yield res
-}
-*/
-}
-
-def deleteUser(userId: Long) = {
-//table.filter(_.id == id).result.delete
-val q = table.filter(_.id == userId)
-val action = q.
-val affectedRowsCount: Future[Int] = db.run(action)
-//val sql = action.statements.head
-}
-
-
-}
-*/

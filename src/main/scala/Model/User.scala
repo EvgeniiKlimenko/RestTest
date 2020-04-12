@@ -9,20 +9,21 @@ import java.util.UUID
 final case class UserItem(name: String, id: Long)
 
 final case class User( 
-  id: Long,
+  id: String,
   firstName: String,
   lastName: String,
-  //dateOfBirth: Option[java.util.Date],
+  born: String,
   address: String
 )
 
+
 class Users(tag: Tag) extends Table[User](tag, "users") {
-  def id = column[Long]("id", O.AutoInc, O.PrimaryKey)
+  def id = column[String]("id", O.PrimaryKey)
   def firstName = column[String]("firstname")
   def lastName = column[String]("lastname")
-  //def dateOfBirth  = column[java.util.Date]("dateofbirth")
+  def born  = column[String]("born")
   def address = column[String]("address")
-  def * = (id, firstName, lastName, address) <>(User.tupled, User.unapply)
+  def * = (id, firstName, lastName, born, address) <>(User.tupled, User.unapply)
 
 /*
   implicit val dateTypeMapper = MappedTypeMapper.base[java.util.Date, java.sql.Date](

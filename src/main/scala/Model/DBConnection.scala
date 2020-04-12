@@ -8,10 +8,8 @@ import slick.jdbc.JdbcBackend._
         driver = "org.postgresql.Driver"
         url = "postgres://postgres:postgres@localhost/resttestdb"
       }
-
 *
 * */
-
 
 object DBConnection {
   val jdbcUrl: String = "jdbc:postgresql://localhost:5432/resttestdb?user=postgres&password=postgres"
