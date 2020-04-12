@@ -1,4 +1,5 @@
 package Controller
+import java.text.SimpleDateFormat
 import java.util.UUID
 
 import Model.User
@@ -22,8 +23,29 @@ import spray.json.DefaultJsonProtocol._
 object UserController extends Directives  {
   val errorMsg: String = s"internal error"
   val unexpectedMsg: String = s"unexpected result"
-  implicit val myFormat: RootJsonFormat[Model.User] = jsonFormat5(Model.User)
-
+  // marshalling:
+  implicit val UserJsonWriter = new RootJsonFormat[Model.User] {
+    def write(user: Model.User): JsValue = {
+      JsObject(
+        "id" -> JsString(user.id),
+        "firstname" -> JsString(user.firstName),
+        "lastname" -> JsString(user.lastName),
+        "born" -> JsString(user.born.toString),
+        "address" -> JsString(user.address)
+      )
+    }
+    def read(json: JsValue): User = {
+      val sdf =  new SimpleDateFormat("dd-MM-yyyy")
+      val fields = json.asJsObject("Expected user object").fields
+      User(id = fields("id").convertTo[String],
+        firstName = fields("firstName").convertTo[String],
+        lastName = fields("lastName").convertTo[String],
+        born = sdf.parse(fields("born").convertTo[String]),
+        address = fields("address").convertTo[String]
+      )
+    }
+  }
+  //implicit val myFormat: RootJsonFormat[Model.User] = jsonFormat5(Model.User)
   implicit val system: ActorSystem = ActorSystem("resttest")
   implicit val executor: ExecutionContext = system.dispatcher
   implicit val materializer: Materializer = Materializer.matFromSystem(system)

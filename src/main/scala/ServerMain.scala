@@ -34,20 +34,21 @@ object ServerMain {
 
   }
 
+  // testing testing
   def testMain(): Unit ={
     //testDeleteUser()
     //testGetWithId(2)
     //testSaveUser()
     //testGetAll()
-    testUpdateUser()
-    testGetWithId("c18e751d-8ba8-477f-9de2-4ec6a9809005")
+    //testUpdateUser()
+    //testGetWithId("c18e751d-8ba8-477f-9de2-4ec6a9809005")
 
     //val wait : Duration = Duration.create(100, "ms")
     //val par1 = f.result(wait)
     //val par1: Seq[User] = f.result(wait)
 
   }
-
+/*
   def testGetAll(): Unit = {
     val res: Future[Seq[Model.User]] = UserService.getAll()
     res.onComplete{
@@ -79,12 +80,12 @@ object ServerMain {
     val res: Future[Int] = UserService.deleteUser("2")
     val resInt = Await.result(res, wait)
     println(resInt)
-    /*
+
     res.onComplete{
       case Success(s)=> res.foreach(println)
       case Failure(t) => t.printStackTrace()
     }
-    */
+
   }
 
   def testUpdateUser(): Unit = {
@@ -94,13 +95,14 @@ object ServerMain {
     val res: Future[Int] = UserService.updateUser("c18e751d-8ba8-477f-9de2-4ec6a9809005", testUser)
     val resInt = Await.result(res, wait)
     println(resInt)
-    /*
+
     res.onComplete{
       case Success(s)=> res.foreach(println)
       case Failure(t) => t.printStackTrace()
     }
-    */
-  }
 
+
+  }
+*/
 
 }
