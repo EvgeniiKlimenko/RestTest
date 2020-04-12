@@ -39,11 +39,14 @@ object UserService extends TableQuery(new Users(_)) {
   val table = TableQuery[Model.Users]
   val pause : Duration = Duration.create(1000, "ms")
 
-  def getAllJson(): Unit ={
+/* to delete
+  def getAllJson(): Future[Seq[User]] ={
     val res: Future[Seq[Model.User]] = getAll()
     val resSeq: Seq[User] = Await.result(res, pause)
-
+    val toResp: JsValue = resSeq.toJson
+    return  res
   }
+*/
 
   def saveUserJson(userIn: User): JsValue = {
     //val usr: User = userJson.convertTo
@@ -54,21 +57,18 @@ object UserService extends TableQuery(new Users(_)) {
       return onSuccessJson
     }
   }
-
-
+/* to delete
   def getWithIdJson(id: String): JsValue = {
     //val userObj: Future[Option[User]] = getWithID(id)
     val prepUser: User  = Await.result(getWithID(id), pause).head // convert Future to User.obj
     val userJson: JsValue = prepUser.toJson
     return userJson
   }
-
+*/
   // restriction: this method takes only whole User object with changed and unchanged fields
-  def updateUserJson(id: String, userIn: User): JsValue ={ // unused id:String
-    //val usr: User = userJson.convertTo[User]
+  def updateUserJson(usrId: String, userIn: User): JsValue = {
     println(userIn.toString)
-    val res: Int  = Await.result(updateUser(userIn.id, userIn), pause) // Update DB
-    //val userToResponse: User = updatedUser.copy(id=UUID.randomUUID().toString) // Prepare for response
+    val res: Int  = Await.result(updateUser(usrId, userIn), pause) // Update DB
     if (res != 1) {
       return onFailJson
     }else {
@@ -76,8 +76,8 @@ object UserService extends TableQuery(new Users(_)) {
     }
   }
 
-  def deleteUserJson(id: String): JsValue ={
-    val res: Int = Await.result(deleteUser(id), pause)
+  def deleteUserJson(usrId: String): JsValue ={
+    val res: Int = Await.result(deleteUser(usrId), pause)
     if (res != 1) {
       return onFailJson
     }else {
@@ -99,11 +99,10 @@ object UserService extends TableQuery(new Users(_)) {
     table.map(c => (c.id, c.firstName, c.lastName, c.born, c.address)) += (insertUser.id, insertUser.firstName, insertUser.lastName, insertUser.born, insertUser.address)
   }
 
-  def getWithID(userId: String): Future[Option[User]] = {
-    val q = table.filter(_.id === userId)
+  def getWithID(usrId: String): Future[Option[User]] = {
+    val q = table.filter(_.id === usrId)
     val action = q.result.headOption
     val userFromDB: Future[Option[User]] = db.run(action)
-    //val ussr: User = Await.result(userFromDB, wait).head
     return userFromDB
   }
 
@@ -111,12 +110,11 @@ object UserService extends TableQuery(new Users(_)) {
     val q = table.filter(_.id === userId)
     val action = q.delete
     val affectedRowsCount: Future[Int] = db.run(action)
-    //val sql = action.statements.head
     return affectedRowsCount
   }
 
-  def updateUser(userId: String, ussr: User): Future[Int] =  { // unused userId:String
-    val q = table.filter(_.id === userId).update(ussr.copy(id = ussr.id, ussr.firstName, ussr.lastName, ussr.born, ussr.address))
+  def updateUser(usrId: String, ussr: User): Future[Int] =  {
+    val q = table.filter(_.id === usrId).update(ussr.copy(id = usrId, ussr.firstName, ussr.lastName, ussr.born, ussr.address))
     val res:Future[Int]  = db.run(q)
     return res
 

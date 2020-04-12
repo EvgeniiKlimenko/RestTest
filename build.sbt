@@ -16,8 +16,7 @@ libraryDependencies ++= {
     "com.typesafe.akka" %% "akka-actor-typed" % "2.6.4",
     "com.typesafe.akka" %% "akka-http-spray-json" % "10.1.11",
     "com.typesafe.slick"  %%  "slick"     % "3.3.2",
-    "com.typesafe.slick" %% "slick-hikaricp" % "3.3.2",
-    "io.spray" %% "spray-json" % "1.3.5"
+    "com.typesafe.slick" %% "slick-hikaricp" % "3.3.2"
 
   )
 }

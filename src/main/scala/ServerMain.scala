@@ -18,7 +18,6 @@ import scala.concurrent.duration.Duration
 
 
 object ServerMain {
-
   implicit val system: ActorSystem = ActorSystem("resttest")
   implicit val executor: ExecutionContext = system.dispatcher
   implicit val materializer: Materializer = Materializer.matFromSystem(system)
@@ -26,15 +25,13 @@ object ServerMain {
   def main(args: Array[String]) {
     val db = DBConnection.db
     val conf = ConfigFactory.load()
-    testMain()
-    /*
+    //testMain()
     val endPoints = UserController.points
-    val host: String = "0.0.0.0"
+    val host: String = "localhost"
     val port: Int = 8090
     Http().bindAndHandle(endPoints, host, port)
-
     println(s"Server online at http://localhost:8090/")
-*/
+
   }
 
   def testMain(): Unit ={
