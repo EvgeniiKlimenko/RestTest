@@ -42,11 +42,12 @@ object UserService extends TableQuery(new Users(_)) {
   /**
    * Save new user into database
    * @param usr Takes Model.User object from HTTP request.
+   * @param newId New generated Id for new user.
    * @return number of affected rows. Must be 1 if success.
    */
-  def saveUser(usr: User): Future[Int] = db.run {
+  def saveUser(newId: String, usr: User): Future[Int] = db.run {
     println("Saving a new user")
-    val insertUser:User = usr.copy(id=UUID.randomUUID().toString)
+    val insertUser:User = usr.copy(id=newId)
     table.map(c => (c.id, c.firstName, c.lastName, c.born, c.address)) +=
              (insertUser.id, insertUser.firstName, insertUser.lastName, insertUser.born, insertUser.address)
   }

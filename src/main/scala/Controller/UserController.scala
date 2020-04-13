@@ -1,5 +1,7 @@
 package Controller
 import java.text.SimpleDateFormat
+import java.util.UUID
+
 import Model.User
 
 import scala.language.postfixOps
@@ -18,8 +20,6 @@ import spray.json.DefaultJsonProtocol._
 
 
 object UserController extends Directives  {
-  val errorMsg: String = s"internal error"
-  val unexpectedMsg: String = s"unexpected result"
 
   implicit val UserJsonWriter = new RootJsonFormat[Model.User] {
     /**
@@ -73,9 +73,11 @@ object UserController extends Directives  {
         println("POST a new user")
         path("create-user")
         entity(as[User]){ user =>
-          val resp: Future[Int] = UserService.saveUser(user)
+          val newId: String = "Created user ID: " + UUID.randomUUID().toString
+          println(newId)
+          val resp: Future[Int] = UserService.saveUser(newId, user)
             onComplete(resp){
-              case Success(resp) => complete(StatusCodes.Created)
+              case Success(resp) => complete(newId)
               case Failure(ex) => complete(BadRequest, s"Houston, we have a problem: ${ex.getMessage}")
             }
         }
