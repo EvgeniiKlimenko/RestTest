@@ -73,11 +73,11 @@ object UserController extends Directives  {
         println("POST a new user")
         path("create-user")
         entity(as[User]){ user =>
-          val newId: String = "Created user ID: " + UUID.randomUUID().toString
+          val newId: String = UUID.randomUUID().toString
           println(newId)
           val resp: Future[Int] = UserService.saveUser(newId, user)
             onComplete(resp){
-              case Success(resp) => complete(newId)
+              case Success(resp) => complete("Created user ID: " + newId)
               case Failure(ex) => complete(BadRequest, s"Houston, we have a problem: ${ex.getMessage}")
             }
         }
