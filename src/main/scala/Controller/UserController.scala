@@ -1,7 +1,5 @@
 package Controller
 import java.text.SimpleDateFormat
-import java.util.UUID
-
 import Model.User
 
 import scala.language.postfixOps
@@ -11,20 +9,24 @@ import spray.json._
 import akka.http.scaladsl.model.StatusCodes._
 import Service.UserService
 import akka.actor.ActorSystem
-import spray.json.DefaultJsonProtocol.jsonFormat5
 
 import scala.concurrent.{ExecutionContext, Future}
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
 import akka.http.scaladsl.model.StatusCodes
-import akka.stream.{ActorMaterializer, Materializer}
+import akka.stream.Materializer
 import spray.json.DefaultJsonProtocol._
 
 
 object UserController extends Directives  {
   val errorMsg: String = s"internal error"
   val unexpectedMsg: String = s"unexpected result"
-  // marshalling:
+
   implicit val UserJsonWriter = new RootJsonFormat[Model.User] {
+    /**
+     * Marshalling Model.User to Json.
+     * @param user Model.User object.
+     * @return Json representation of Model.User.
+     */
     def write(user: Model.User): JsValue = {
       JsObject(
         "id" -> JsString(user.id),
@@ -34,6 +36,12 @@ object UserController extends Directives  {
         "address" -> JsString(user.address)
       )
     }
+
+    /**
+     * Marshalling Json to Model.User
+     *  @param json Json from Http request.
+     *  @return Model.User object.
+     */
     def read(json: JsValue): User = {
       val sdf =  new SimpleDateFormat("dd-MM-yyyy")
       val fields = json.asJsObject("Expected user object").fields
@@ -45,7 +53,6 @@ object UserController extends Directives  {
       )
     }
   }
-  //implicit val myFormat: RootJsonFormat[Model.User] = jsonFormat5(Model.User)
   implicit val system: ActorSystem = ActorSystem("resttest")
   implicit val executor: ExecutionContext = system.dispatcher
   implicit val materializer: Materializer = Materializer.matFromSystem(system)
@@ -80,6 +87,7 @@ object UserController extends Directives  {
         val userFromDb: Future[Option[Model.User]] = UserService.getWithID(userId.toString)
         onComplete(userFromDb) {
           case Success(Some(user: Model.User)) => complete(user)
+          case Success(None) => complete(StatusCodes.NoContent)
           case Failure(ex) => complete(StatusCodes.NotFound, "No such user! ${ex.getMessage}")
         }
       }
